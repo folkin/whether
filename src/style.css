@@ -1,0 +1,445 @@
+/* ============================================================
+   THEME TOKENS
+============================================================ */
+:root {
+  --bg: #ffffff;
+  --surface: #fafafd;
+  --border: #f0f1f2;
+  --fg: #202020;
+  --fg-muted: #606060;
+  --accent: #0069cc;
+  --vscode-charts-blue: #1a5cff;
+  --vscode-charts-green: #388a34;
+  --vscode-charts-orange: #d18616;
+  --vscode-charts-red: #ad0707;
+  --vscode-charts-yellow: #667309;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #121314;
+  --surface: #191a1b;
+  --border: #2a2b2c;
+  --fg: #bfbfbf;
+  --fg-muted: #8c8c8c;
+  --accent: #3994bc;
+  --vscode-charts-blue: #57a3f8;
+  --vscode-charts-green: #86cf86;
+  --vscode-charts-orange: #cd861a;
+  --vscode-charts-red: #ef8773;
+  --vscode-charts-yellow: #e0b97f;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --bg: #121314;
+    --surface: #191a1b;
+    --border: #2a2b2c;
+    --fg: #bfbfbf;
+    --fg-muted: #8c8c8c;
+    --accent: #3994bc;
+    --vscode-charts-blue: #57a3f8;
+    --vscode-charts-green: #86cf86;
+    --vscode-charts-orange: #cd861a;
+    --vscode-charts-red: #ef8773;
+    --vscode-charts-yellow: #e0b97f;
+    color-scheme: dark;
+  }
+}
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  line-height: 1.5;
+  transition: background 0.2s, color 0.2s;
+}
+
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ============================================================
+   OFFLINE BANNER
+============================================================ */
+.offline-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: color-mix(in srgb, var(--vscode-charts-orange) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--vscode-charts-orange) 35%, transparent);
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.offline-banner .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vscode-charts-orange);
+  flex-shrink: 0;
+}
+
+.offline-banner strong {
+  color: var(--fg);
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.header-location {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-city {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.header-date {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.theme-toggle:hover {
+  background: var(--border);
+}
+
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+/* ============================================================
+   CURRENT CONDITIONS CARD
+============================================================ */
+.current-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.current-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.current-temp-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.current-temp {
+  font-size: 5rem;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--fg);
+}
+
+.current-feels {
+  font-size: 0.9rem;
+  color: var(--fg-muted);
+  margin-top: 4px;
+}
+
+.current-condition {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--fg);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Current conditions detail grid */
+.current-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--fg-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.detail-value {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+/* ============================================================
+   FORECAST STRIPS
+============================================================ */
+.forecast-section-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.forecast-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.forecast-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 8px 14px;
+  border-right: 1px solid var(--border);
+  min-width: 88px;
+}
+
+.forecast-day:last-child {
+  border-right: none;
+}
+
+.forecast-day-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.forecast-day:first-child .forecast-day-label {
+  color: var(--accent);
+}
+
+.forecast-icon {
+  margin: 2px 0;
+}
+
+.forecast-temps {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.forecast-high {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.forecast-low {
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.forecast-precip {
+  font-size: 0.72rem;
+  color: var(--vscode-charts-blue);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.forecast-precip-muted {
+  color: var(--fg-muted);
+}
+
+/* ============================================================
+   APP ICON CANDIDATES
+============================================================ */
+.app-icons-section {
+  margin-bottom: 24px;
+}
+
+.app-icons-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.app-icon-candidate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.app-icon-box svg {
+  width: 36px;
+  height: 36px;
+  stroke: white;
+  stroke-width: 1.5;
+}
+
+.app-icon-label {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+/* ============================================================
+   SECTION HEADINGS
+============================================================ */
+.section-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg-muted);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ============================================================
+   ATTRIBUTION
+============================================================ */
+.attribution {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+  padding: 16px 0 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 600px) {
+  .current-temp { font-size: 4rem; }
+  .current-top { flex-direction: column; }
+  .current-details { grid-template-columns: repeat(2, 1fr); }
+  .forecast-strip { grid-template-columns: none; display: flex; }
+}
+
+/* ============================================================
+   TAB NAV
+============================================================ */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab-btn:hover { color: var(--fg); }
+
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ============================================================
+   RADAR STUB
+============================================================ */
+.radar-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  gap: 8px;
+}
