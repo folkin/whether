@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { CACHE_NAMES } from './src/config.js'
 
 export default defineConfig({
   plugins: [
@@ -15,7 +16,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/api\.open-meteo\.com\//,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'weather-data-v1',  // matches CACHE_NAMES.weatherData
+              cacheName: CACHE_NAMES.weatherData,
               networkTimeoutSeconds: 10,
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 },  // 1h fallback ceiling
               cacheableResponse: { statuses: [0, 200] },
@@ -27,7 +28,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/api\.rainviewer\.com\/public\/weather-maps\.json/,
             handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'radar-manifest-v1',  // matches CACHE_NAMES.radarManifest
+              cacheName: CACHE_NAMES.radarManifest,
               expiration: { maxEntries: 1, maxAgeSeconds: 60 * 2 },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -37,7 +38,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/tilecache\.rainviewer\.com\//,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'radar-tiles-v1',  // matches CACHE_NAMES.radarTiles
+              cacheName: CACHE_NAMES.radarTiles,
               expiration: { maxEntries: 200, maxAgeSeconds: 60 * 10 },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -47,7 +48,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/[a-z]\.basemaps\.cartocdn\.com\//,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'carto-tiles-v1',  // matches CACHE_NAMES.cartoTiles
+              cacheName: CACHE_NAMES.cartoTiles,
               expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 7 },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -62,14 +63,12 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
-        // TODO: add real PNG icons before production.
-        // Place icon-192.png and icon-512.png in public/icons/ and restore:
-        // icons: [
-        //   { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-        //   { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-        //   { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-        // ],
-        icons: [],
+        icons: [
+          { src: '/icons/pwa-64x64.png', sizes: '64x64', type: 'image/png' },
+          { src: '/icons/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icons/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/icons/maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
     }),
   ],
