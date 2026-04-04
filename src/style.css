@@ -549,3 +549,98 @@ svg {
     display: none; /* hide on very small screens to save space */
   }
 }
+
+/* ============================================================
+   HEADER ACTIONS (added by Piece 12 — App Shell)
+============================================================ */
+.header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Units toggle — matches .theme-toggle style */
+.units-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 38px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.units-toggle:hover {
+  background: var(--border);
+}
+
+/* Location button — icon button matching .theme-toggle */
+.locate-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.locate-btn:hover {
+  background: var(--border);
+}
+
+.locate-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================================
+   LOCATION PROMPT
+============================================================ */
+.location-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+}
+
+.locate-btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: opacity 0.15s;
+}
+
+.locate-btn-primary:hover {
+  opacity: 0.85;
+}
+
+.locate-btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
