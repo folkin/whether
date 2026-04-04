@@ -443,3 +443,109 @@ svg {
   font-size: 0.9rem;
   gap: 8px;
 }
+
+/* ============================================================
+   RADAR MAP & CONTROLS
+============================================================ */
+
+/* The tab panel that hosts the Leaflet map must be a positioned
+   block so the map fills it and the controls overlay correctly. */
+.tab-panel#panel-radar {
+  position: relative;
+  height: 480px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+/* Leaflet renders into the first child div it creates inside el.
+   Make sure the map tiles fill the whole panel. */
+.tab-panel#panel-radar .leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+/* ── Animation controls overlay ──────────────────────────── */
+.radar-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* above Leaflet's default z-index stack */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+}
+
+/* Play / pause button */
+.radar-play-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1;
+}
+
+.radar-play-btn:hover {
+  background: var(--border);
+}
+
+/* Scrubber — fills available space */
+.radar-scrubber {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Timestamp label */
+.radar-timestamp {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  min-width: 6ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Responsive adjustments ──────────────────────────────── */
+@media (max-width: 600px) {
+  .tab-panel#panel-radar {
+    height: 360px;
+    border-radius: 6px;
+  }
+
+  .radar-controls {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .radar-play-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .radar-timestamp {
+    display: none; /* hide on very small screens to save space */
+  }
+}
