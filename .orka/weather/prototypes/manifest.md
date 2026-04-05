@@ -1,0 +1,1 @@
+weather-prototype.html [2] - self-contained static mockup: current conditions, 7-day forecast, offline banner, theme toggle, dual icon treatment comparison, app icon candidates

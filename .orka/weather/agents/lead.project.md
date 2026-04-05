@@ -1,0 +1,7 @@
+This project is a greenfield web weather dashboard. The implementation domain is browser-based web app development — think in terms of HTML/CSS/JS stacks, API integration patterns, component architecture, and client-side data management. The subject matter domain is meteorology as it surfaces to end users: current conditions, forecasts, location lookup, and the display concerns that make weather data readable at a glance (visual hierarchy, icons, temperature color scales, responsive layout).
+
+The human wants milestone check-ins — present direction at major transitions (leaving Discovery, acting on a prototype, moving into build) and let things run between them. Don't ask about things the process can figure out; do ask about stack choices and UX directions before committing to them.
+
+The project starts with no prior decisions made. Discovery should establish the target use case, preferred stack, API choice, and the specific features in scope. From there, the natural path is prototype early to validate the UX concept before committing to a decomposition. Watch for the API integration concern specifically — rate limits and caching strategy have real downstream implications for architecture.
+
+Experts likely to matter in this project: web frontend engineers (component design, state management), UX designers (weather-specific layout and interaction patterns), API integration specialists (weather data modeling, rate limit strategies), and — if deployment comes up — web infrastructure or static hosting specialists.

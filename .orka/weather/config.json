@@ -1,0 +1,10 @@
+{
+  "name": "weather",
+  "implDomain": "web application / dashboard",
+  "subjectDomain": "weather / meteorology",
+  "outcomeDir": "/home/human/code/personal/weather",
+  "involvement": "milestone check-ins",
+  "leadModel": "claude-sonnet-4-6",
+  "principalModel": "claude-sonnet-4-6",
+  "orkaVersion": "4.2.0"
+}

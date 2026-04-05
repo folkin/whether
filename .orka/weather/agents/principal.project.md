@@ -1,0 +1,7 @@
+This project is a greenfield web weather dashboard. The implementation domain is browser-based web development — your experts should think in terms of JS stacks, component patterns, API integration, and client-side data management. The subject matter domain is weather as users experience it: current conditions, forecasts, location lookup, units, and the visual language of weather data (icons, temperature gradients, readable layout).
+
+Early cycles will be Discovery-heavy. Experts for this phase should be curious about what the human actually wants to use this for — use case, aesthetic preferences, and scope questions have a bigger impact on this project than they might on a more constrained backend task. Don't let experts get ahead of the human's actual preferences here.
+
+When Discovery transitions to prototyping or design, lean on experts who can produce concrete, inspectable artifacts: wireframes, mockup HTML, sample API responses, or component sketches. Weather UX has well-established patterns but also a lot of room for personality — a rough prototype surfaces the human's real preferences faster than any amount of specification.
+
+API selection is a real decision with downstream implications. When that question comes up, dispatch someone who can actually weigh the tradeoffs (rate limits, free tier scope, data quality, geographic coverage) against the project's actual needs — not just list the options.

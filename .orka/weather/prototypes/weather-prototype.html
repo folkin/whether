@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Dashboard — Prototype</title>
+  <style>
+    /* ============================================================
+       THEME TOKENS
+    ============================================================ */
+    :root {
+      --bg: #ffffff;
+      --surface: #fafafd;
+      --border: #f0f1f2;
+      --fg: #202020;
+      --fg-muted: #606060;
+      --accent: #0069cc;
+      --chart-blue: #1a5cff;
+      --chart-green: #388a34;
+      --chart-orange: #d18616;
+      --chart-red: #ad0707;
+      --chart-yellow: #667309;
+      color-scheme: light;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121314;
+      --surface: #191a1b;
+      --border: #2a2b2c;
+      --fg: #bfbfbf;
+      --fg-muted: #8c8c8c;
+      --accent: #3994bc;
+      --chart-blue: #57a3f8;
+      --chart-green: #86cf86;
+      --chart-orange: #cd861a;
+      --chart-red: #ef8773;
+      --chart-yellow: #e0b97f;
+      color-scheme: dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --bg: #121314;
+        --surface: #191a1b;
+        --border: #2a2b2c;
+        --fg: #bfbfbf;
+        --fg-muted: #8c8c8c;
+        --accent: #3994bc;
+        --chart-blue: #57a3f8;
+        --chart-green: #86cf86;
+        --chart-orange: #cd861a;
+        --chart-red: #ef8773;
+        --chart-yellow: #e0b97f;
+        color-scheme: dark;
+      }
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      line-height: 1.5;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    svg {
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       LAYOUT
+    ============================================================ */
+    .app {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* ============================================================
+       OFFLINE BANNER
+    ============================================================ */
+    .offline-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: color-mix(in srgb, var(--chart-orange) 12%, var(--surface));
+      border: 1px solid color-mix(in srgb, var(--chart-orange) 35%, transparent);
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+
+    .offline-banner .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--chart-orange);
+      flex-shrink: 0;
+    }
+
+    .offline-banner strong {
+      color: var(--fg);
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .header-location {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-city {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .header-date {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--fg);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+    }
+
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: block; }
+
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    /* ============================================================
+       CURRENT CONDITIONS CARD
+    ============================================================ */
+    .current-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .current-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .current-temp-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .current-temp {
+      font-size: 5rem;
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: -2px;
+      color: var(--fg);
+    }
+
+    .current-feels {
+      font-size: 0.9rem;
+      color: var(--fg-muted);
+      margin-top: 4px;
+    }
+
+    .current-condition {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--fg);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Icon treatment comparison */
+    .icon-treatment-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-muted);
+      margin-bottom: 6px;
+    }
+
+    .icon-treatment-row {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    .icon-treatment-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .icon-treatment-col .icon-treatment-label {
+      text-align: center;
+    }
+
+    .icon-mono { color: currentColor; }
+    .icon-accent-cloudy { color: var(--chart-blue); }
+    .icon-accent-rain { color: var(--chart-blue); }
+    .icon-accent-snow { color: #93c5fd; }
+    .icon-accent-thunder { color: var(--chart-red); }
+    .icon-accent-clear { color: var(--chart-yellow); }
+    .icon-accent-fog { color: var(--fg-muted); }
+    .icon-accent-overcast { color: var(--fg-muted); }
+
+    /* Current conditions detail grid */
+    .current-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--fg-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .detail-value {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--fg);
+    }
+
+    /* ============================================================
+       FORECAST STRIPS
+    ============================================================ */
+    .forecast-section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-muted);
+      margin-bottom: 8px;
+      padding: 0 2px;
+    }
+
+    .forecast-comparison {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .forecast-strip-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 0;
+      overflow: hidden;
+    }
+
+    .forecast-strip-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg-muted);
+      padding: 10px 16px 4px;
+    }
+
+    .forecast-strip {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .forecast-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 8px 14px;
+      border-right: 1px solid var(--border);
+      min-width: 88px;
+    }
+
+    .forecast-day:last-child {
+      border-right: none;
+    }
+
+    .forecast-day-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .forecast-day:first-child .forecast-day-label {
+      color: var(--accent);
+    }
+
+    .forecast-icon {
+      margin: 2px 0;
+    }
+
+    .forecast-temps {
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+    }
+
+    .forecast-high {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .forecast-low {
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+
+    .forecast-precip {
+      font-size: 0.72rem;
+      color: var(--chart-blue);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .forecast-precip-muted {
+      color: var(--fg-muted);
+    }
+
+    /* ============================================================
+       APP ICON CANDIDATES
+    ============================================================ */
+    .app-icons-section {
+      margin-bottom: 24px;
+    }
+
+    .app-icons-grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .app-icon-candidate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .app-icon-box svg {
+      width: 36px;
+      height: 36px;
+      stroke: white;
+      stroke-width: 1.5;
+    }
+
+    .app-icon-label {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+    }
+
+    /* ============================================================
+       SECTION HEADINGS
+    ============================================================ */
+    .section-heading {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--fg-muted);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       ATTRIBUTION
+    ============================================================ */
+    .attribution {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--fg-muted);
+      padding: 16px 0 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 600px) {
+      .current-temp { font-size: 4rem; }
+      .current-top { flex-direction: column; }
+      .current-details { grid-template-columns: repeat(2, 1fr); }
+      .forecast-strip { grid-template-columns: none; display: flex; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============================================================
+       OFFLINE BANNER
+  ============================================================ -->
+  <div class="offline-banner">
+    <span class="dot"></span>
+    <span><strong>Last updated 4 hours ago</strong> — you're offline</span>
+  </div>
+
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
+  <div class="header">
+    <div class="header-location">
+      <span class="header-city">Portland, OR</span>
+      <span class="header-date">Saturday, April 4, 2026</span>
+    </div>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+      <!-- sun icon (shown in dark mode) -->
+      <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2" /><path d="M12 20v2" />
+        <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+        <path d="M2 12h2" /><path d="M20 12h2" />
+        <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+      </svg>
+      <!-- moon icon (shown in light mode) -->
+      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 5h4" /><path d="M20 3v4" />
+        <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- ============================================================
+       CURRENT CONDITIONS
+  ============================================================ -->
+  <div class="current-card">
+    <div class="current-top">
+
+      <!-- Temperature block -->
+      <div class="current-temp-block">
+        <span class="current-temp">72°</span>
+        <span class="current-feels">Feels like 69°F</span>
+        <span class="current-condition">
+          <!-- inline cloud-sun for condition label -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+            <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+            <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+            <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+          </svg>
+          Partly Cloudy
+        </span>
+      </div>
+
+      <!-- Icon treatment comparison -->
+      <div>
+        <div class="icon-treatment-label" style="margin-bottom:10px;">Condition icon — choose a style:</div>
+        <div class="icon-treatment-row">
+          <div class="icon-treatment-col">
+            <div class="icon-treatment-label">Monochrome</div>
+            <svg class="icon-mono" xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+              <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+              <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+              <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+            </svg>
+          </div>
+          <div class="icon-treatment-col">
+            <div class="icon-treatment-label">Accent color</div>
+            <svg class="icon-accent-cloudy" xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+              <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+              <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+              <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail metrics row -->
+    <div class="current-details">
+
+      <div class="detail-item">
+        <span class="detail-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.8 19.6A2 2 0 1 0 14 16H2" /><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2" /><path d="M9.8 4.4A2 2 0 1 1 11 8H2" />
+          </svg>
+          Wind
+        </span>
+        <span class="detail-value">8 mph NW</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z" />
+            <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97" />
+          </svg>
+          Humidity
+        </span>
+        <span class="detail-value">65%</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" /><path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" /><path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+          UV Index
+        </span>
+        <span class="detail-value">UV 4</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          Visibility
+        </span>
+        <span class="detail-value">10 mi</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 13v7a2 2 0 0 0 4 0" />
+            <path d="M12 2v2" />
+            <path d="M20.992 13a1 1 0 0 0 .97-1.274 10.284 10.284 0 0 0-19.923 0A1 1 0 0 0 3 13z" />
+          </svg>
+          Precip
+        </span>
+        <span class="detail-value">0.0 in</span>
+      </div>
+
+      <div class="detail-item">
+        <span class="detail-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" />
+          </svg>
+          Feels Like
+        </span>
+        <span class="detail-value">69°F</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       7-DAY FORECAST — MONOCHROME STRIP
+  ============================================================ -->
+  <div class="forecast-comparison">
+    <div>
+      <div class="section-heading">7-Day Forecast</div>
+
+      <!-- MONOCHROME STRIP -->
+      <div class="forecast-strip-wrapper" style="margin-bottom:12px;">
+        <div class="forecast-strip-title">Monochrome</div>
+        <div class="forecast-strip">
+
+          <!-- Today — WMO 2 partly cloudy -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Today</span>
+            <div class="forecast-icon icon-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+                <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+                <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+                <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">73°</span>
+              <span class="forecast-low">43°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">7%</span>
+          </div>
+
+          <!-- Tue — WMO 63 rain -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Tue</span>
+            <div class="forecast-icon icon-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                <path d="M16 14v6" /><path d="M8 14v6" /><path d="M12 16v6" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">68°</span>
+              <span class="forecast-low">42°</span>
+            </div>
+            <span class="forecast-precip">76%</span>
+          </div>
+
+          <!-- Wed — WMO 73 snow -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Wed</span>
+            <div class="forecast-icon icon-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                <path d="M8 15h.01" /><path d="M8 19h.01" />
+                <path d="M12 17h.01" /><path d="M12 21h.01" />
+                <path d="M16 15h.01" /><path d="M16 19h.01" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">55°</span>
+              <span class="forecast-low">38°</span>
+            </div>
+            <span class="forecast-precip">45%</span>
+          </div>
+
+          <!-- Thu — WMO 95 thunderstorm -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Thu</span>
+            <div class="forecast-icon icon-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973" />
+                <path d="m13 12-3 5h4l-3 5" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">61°</span>
+              <span class="forecast-low">40°</span>
+            </div>
+            <span class="forecast-precip">60%</span>
+          </div>
+
+          <!-- Fri — WMO 0 clear sky -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Fri</span>
+            <div class="forecast-icon icon-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2" /><path d="M12 20v2" />
+                <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+                <path d="M2 12h2" /><path d="M20 12h2" />
+                <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">65°</span>
+              <span class="forecast-low">41°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">2%</span>
+          </div>
+
+          <!-- Sat — WMO 1 mainly clear -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Sat</span>
+            <div class="forecast-icon icon-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+                <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+                <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+                <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">70°</span>
+              <span class="forecast-low">44°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">5%</span>
+          </div>
+
+          <!-- Sun — WMO 3 overcast -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Sun</span>
+            <div class="forecast-icon icon-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">74°</span>
+              <span class="forecast-low">46°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">15%</span>
+          </div>
+
+        </div><!-- /forecast-strip -->
+      </div><!-- /monochrome wrapper -->
+
+      <!-- ACCENT COLOR STRIP -->
+      <div class="forecast-strip-wrapper">
+        <div class="forecast-strip-title">Accent color</div>
+        <div class="forecast-strip">
+
+          <!-- Today — WMO 2 partly cloudy — accent: chart-blue -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Today</span>
+            <div class="forecast-icon icon-accent-cloudy">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+                <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+                <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+                <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">73°</span>
+              <span class="forecast-low">43°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">7%</span>
+          </div>
+
+          <!-- Tue — WMO 63 rain — accent: chart-blue -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Tue</span>
+            <div class="forecast-icon icon-accent-rain">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                <path d="M16 14v6" /><path d="M8 14v6" /><path d="M12 16v6" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">68°</span>
+              <span class="forecast-low">42°</span>
+            </div>
+            <span class="forecast-precip">76%</span>
+          </div>
+
+          <!-- Wed — WMO 73 snow — accent: #93c5fd -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Wed</span>
+            <div class="forecast-icon icon-accent-snow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                <path d="M8 15h.01" /><path d="M8 19h.01" />
+                <path d="M12 17h.01" /><path d="M12 21h.01" />
+                <path d="M16 15h.01" /><path d="M16 19h.01" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">55°</span>
+              <span class="forecast-low">38°</span>
+            </div>
+            <span class="forecast-precip">45%</span>
+          </div>
+
+          <!-- Thu — WMO 95 thunderstorm — accent: chart-red -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Thu</span>
+            <div class="forecast-icon icon-accent-thunder">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973" />
+                <path d="m13 12-3 5h4l-3 5" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">61°</span>
+              <span class="forecast-low">40°</span>
+            </div>
+            <span class="forecast-precip">60%</span>
+          </div>
+
+          <!-- Fri — WMO 0 clear sky — accent: chart-yellow -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Fri</span>
+            <div class="forecast-icon icon-accent-clear">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2" /><path d="M12 20v2" />
+                <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+                <path d="M2 12h2" /><path d="M20 12h2" />
+                <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">65°</span>
+              <span class="forecast-low">41°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">2%</span>
+          </div>
+
+          <!-- Sat — WMO 1 mainly clear — accent: chart-yellow -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Sat</span>
+            <div class="forecast-icon icon-accent-clear">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+                <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+                <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+                <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">70°</span>
+              <span class="forecast-low">44°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">5%</span>
+          </div>
+
+          <!-- Sun — WMO 3 overcast — accent: fg-muted -->
+          <div class="forecast-day">
+            <span class="forecast-day-label">Sun</span>
+            <div class="forecast-icon icon-accent-overcast">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+              </svg>
+            </div>
+            <div class="forecast-temps">
+              <span class="forecast-high">74°</span>
+              <span class="forecast-low">46°</span>
+            </div>
+            <span class="forecast-precip forecast-precip-muted">15%</span>
+          </div>
+
+        </div><!-- /forecast-strip -->
+      </div><!-- /accent wrapper -->
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       APP ICON CANDIDATES
+  ============================================================ -->
+  <div class="app-icons-section">
+    <div class="section-heading">App Icon Candidates</div>
+    <div class="app-icons-grid">
+
+      <!-- cloud-sun -->
+      <div class="app-icon-candidate">
+        <div class="app-icon-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v2" /><path d="m4.93 4.93 1.41 1.41" />
+            <path d="M20 12h2" /><path d="m19.07 4.93-1.41 1.41" />
+            <path d="M15.947 12.65a4 4 0 0 0-5.925-4.128" />
+            <path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" />
+          </svg>
+        </div>
+        <span class="app-icon-label">cloud-sun</span>
+      </div>
+
+      <!-- sun -->
+      <div class="app-icon-candidate">
+        <div class="app-icon-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" /><path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" /><path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+        </div>
+        <span class="app-icon-label">sun</span>
+      </div>
+
+      <!-- cloud -->
+      <div class="app-icon-candidate">
+        <div class="app-icon-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+          </svg>
+        </div>
+        <span class="app-icon-label">cloud</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ATTRIBUTION
+  ============================================================ -->
+  <div class="attribution">
+    Weather data by <a href="https://open-meteo.com" style="color:var(--accent);text-decoration:none;">Open-Meteo</a> (CC BY 4.0)
+  </div>
+
+</div><!-- /app -->
+
+<script>
+  (function () {
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const STORAGE_KEY = 'weather-theme';
+
+    // On load, apply stored preference (overrides CSS media query cascade)
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === 'dark' || stored === 'light') {
+      html.setAttribute('data-theme', stored);
+    }
+
+    btn.addEventListener('click', function () {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem(STORAGE_KEY, next);
+    });
+  })();
+</script>
+</body>
+</html>
