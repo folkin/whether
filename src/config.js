@@ -23,6 +23,7 @@ export const STORAGE_KEYS = {
   activeTab: 'weather:activeTab',
   weatherCache: 'weather:cache',
   weatherCachedAt: 'weather:cachedAt',
+  radarColor: 'weather:radarColor',
 }
 
 export const CACHE_NAMES = {

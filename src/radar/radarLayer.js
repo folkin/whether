@@ -57,6 +57,8 @@ export async function createMap(el, { lat, lon, theme }) {
   const map = L.map(el, {
     center: [lat, lon],
     zoom: 6,
+    minZoom: 3,
+    maxZoom: 12,
     zoomControl: true,
   })
 
@@ -68,25 +70,61 @@ export async function createMap(el, { lat, lon, theme }) {
 
 /**
  * Create a RainViewer radar tile layer for a given manifest path.
- * The layer is NOT added to the map here — caller decides when to add/remove.
+ * Returns a custom L.GridLayer whose tiles are drawn onto <canvas> elements,
+ * allowing client-side palette remapping via a pixel lookup table.
  *
- * Tile URL format:
- *   https://tilecache.rainviewer.com{path}/256/{z}/{x}/{y}/2/1_1.png
- *   color=2 (rainbow), smooth+snow=1_1
+ * Tiles are always fetched as Universal Blue (color=2) — the API ignores the
+ * color parameter on free/keyless requests. Client-side remapping handles
+ * palette switching without additional network requests.
  *
- * @param {object} L    - Leaflet instance (passed in from the caller that already loaded it)
- * @param {string} path - Frame path from the RainViewer manifest
- * @returns {L.TileLayer}
+ * @param {object} L                   - Leaflet instance
+ * @param {string} path                - Frame path from the RainViewer manifest
+ * @param {Map<number, number[]>|null} remapTable
+ *   Pixel remap lookup built by buildRemap(). Pass null for the default
+ *   palette (Universal Blue rendered as-is, no pixel walk needed).
+ * @returns {L.GridLayer}
  */
-export function createRadarTileLayer(L, path) {
-  return L.tileLayer(
-    `https://tilecache.rainviewer.com${path}/256/{z}/{x}/{y}/2/1_1.png`,
-    {
-      opacity: 0.6,
-      zIndex: 10,
-      tileSize: 256,
+export function createRadarTileLayer(L, path, remapTable) {
+  const RadarLayer = L.GridLayer.extend({
+    createTile(coords, done) {
+      const canvas = document.createElement('canvas')
+      canvas.width = 256
+      canvas.height = 256
+      const ctx = canvas.getContext('2d')
+
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0)
+        if (remapTable) {
+          const imageData = ctx.getImageData(0, 0, 256, 256)
+          const px = imageData.data
+          for (let i = 0; i < px.length; i += 4) {
+            const key = (((px[i] << 24) | (px[i + 1] << 16) | (px[i + 2] << 8) | px[i + 3]) >>> 0)
+            const mapped = remapTable.get(key)
+            if (mapped) {
+              px[i]     = mapped[0]
+              px[i + 1] = mapped[1]
+              px[i + 2] = mapped[2]
+              px[i + 3] = mapped[3]
+            }
+          }
+          ctx.putImageData(imageData, 0, 0)
+        }
+        done(null, canvas)
+      }
+      img.onerror = (e) => done(e, canvas)
+      img.src = `https://tilecache.rainviewer.com${path}/256/${coords.z}/${coords.x}/${coords.y}/2/1_1.png`
+      return canvas
     },
-  )
+  })
+
+  return new RadarLayer({
+    opacity: 0.6,
+    zIndex: 10,
+    tileSize: 256,
+    maxNativeZoom: 7,
+  })
 }
 
 /**

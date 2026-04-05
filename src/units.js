@@ -31,6 +31,13 @@ export function formatTime(iso) {
   return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
+export function formatHour(isoString) {
+  const hour = parseInt(isoString.slice(11, 13), 10)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const h = hour % 12 || 12
+  return `${h} ${ampm}`
+}
+
 export function formatRelativeTime(epochMs) {
   const diffMs = Date.now() - epochMs
   const diffSec = diffMs / 1000

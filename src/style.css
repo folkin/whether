@@ -124,13 +124,13 @@ svg {
   flex-direction: column;
 }
 
-.header-city {
+.header-date {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--fg);
 }
 
-.header-date {
+.header-city {
   font-size: 0.8rem;
   color: var(--fg-muted);
 }
@@ -255,8 +255,6 @@ svg {
 .forecast-strip {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .forecast-day {
@@ -266,7 +264,12 @@ svg {
   gap: 5px;
   padding: 10px 8px 14px;
   border-right: 1px solid var(--border);
-  min-width: 88px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.forecast-day.selected {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
 }
 
 .forecast-day:last-child {
@@ -274,11 +277,20 @@ svg {
 }
 
 .forecast-day-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--fg-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.forecast-day-monthday {
+  white-space: nowrap;
+  font-weight: 400;
 }
 
 .forecast-day:first-child .forecast-day-label {
@@ -393,7 +405,21 @@ svg {
   .current-temp { font-size: 4rem; }
   .current-top { flex-direction: column; }
   .current-details { grid-template-columns: repeat(2, 1fr); }
-  .forecast-strip { grid-template-columns: none; display: flex; }
+  .forecast-day {
+    gap: 3px;
+    padding: 8px 4px 10px;
+  }
+  .forecast-day-label { font-size: 0.7rem; }
+  .forecast-high { font-size: 0.85rem; }
+  .forecast-low { font-size: 0.78rem; }
+}
+
+@media (max-width: 400px) {
+  .forecast-precip { display: none; }
+  .forecast-day-label { font-size: 0.62rem; letter-spacing: 0; }
+  .forecast-high { font-size: 0.78rem; }
+  .forecast-low { font-size: 0.72rem; }
+  .temp-unit { display: none; }
 }
 
 /* ============================================================
@@ -512,9 +538,42 @@ svg {
 .radar-scrubber {
   flex: 1;
   min-width: 0;
-  height: 4px;
-  accent-color: var(--accent);
+  height: 20px; /* room for thumb — do not use 4px here, it clips the grip */
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
   cursor: pointer;
+}
+
+.radar-scrubber::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.radar-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.radar-scrubber::-moz-range-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.radar-scrubber::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  box-shadow: none;
 }
 
 /* Timestamp label */
@@ -525,6 +584,62 @@ svg {
   min-width: 6ch;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/* Color scheme select */
+.radar-color-select {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.radar-color-select:hover {
+  background: var(--border);
+}
+
+/* Expand button — same size as play btn, no flex-shrink */
+.radar-expand-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.radar-expand-btn:hover {
+  background: var(--border);
+}
+
+/* Full-viewport expanded state */
+.tab-panel#panel-radar.radar-expanded {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  border-radius: 0;
+  border: none;
+  z-index: 500;
+}
+
+.tab-panel#panel-radar.radar-expanded .leaflet-container {
+  border-radius: 0;
+}
+
+.tab-panel#panel-radar.radar-expanded .radar-controls {
+  border-radius: 0;
 }
 
 /* ── Responsive adjustments ──────────────────────────────── */
@@ -643,4 +758,93 @@ svg {
 .locate-btn-primary:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/* ============================================================
+   HOURLY PANEL
+============================================================ */
+.hourly-panel {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hourly-panel:empty {
+  display: none;
+}
+
+.hourly-row {
+  display: grid;
+  grid-template-columns: 5.5rem auto 1fr 4.5rem 3rem;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hourly-row:last-child {
+  border-bottom: none;
+}
+
+.hourly-time-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hourly-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.hourly-time {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hourly-temp-feels {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hourly-temp {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.hourly-feels {
+  color: var(--fg-muted);
+  font-size: 0.8rem;
+}
+
+.hourly-bar {
+  position: relative;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+
+.hourly-bar-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.hourly-wind {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+}
+
+.hourly-precip {
+  color: var(--vscode-charts-blue);
+  font-size: 0.9rem;
+  text-align: right;
 }

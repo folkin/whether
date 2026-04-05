@@ -58,6 +58,14 @@ function buildUrl(lat, lon, units) {
       'sunrise',
       'sunset',
     ].join(','),
+    hourly: [
+      'temperature_2m',
+      'apparent_temperature',
+      'precipitation_probability',
+      'precipitation',
+      'weather_code',
+      'wind_speed_10m',
+    ].join(','),
     timezone: 'auto',
     forecast_days: '7',
   })
@@ -72,7 +80,7 @@ function buildUrl(lat, lon, units) {
 }
 
 function normalize(data) {
-  const { current, current_units, daily, daily_units } = data
+  const { current, current_units, daily, daily_units, hourly } = data
 
   const currentPayload = {
     temp: current.temperature_2m,
@@ -104,9 +112,20 @@ function normalize(data) {
     precip: daily_units.precipitation_sum,
   }
 
+  const hourlyPayload = hourly.time.map((time, i) => ({
+    time,
+    temp: hourly.temperature_2m[i],
+    feelsLike: hourly.apparent_temperature[i],
+    precipProb: hourly.precipitation_probability[i] ?? 0,
+    precip: hourly.precipitation[i],
+    weatherCode: hourly.weather_code[i],
+    windSpeed: hourly.wind_speed_10m[i],
+  }))
+
   return {
     current: currentPayload,
     daily: dailyPayload,
+    hourly: hourlyPayload,
     units: unitsPayload,
   }
 }

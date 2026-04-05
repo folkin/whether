@@ -127,7 +127,7 @@ async function loadWeather() {
     lastData = data
     clearOfflineBanner()
     currentSection.render(data.current, units)
-    dailySection.render(data.daily, units)
+    dailySection.render(data.daily, data.hourly, units)
   } catch (err) {
     // 5b. Offline path
     if (!navigator.onLine) {
@@ -136,7 +136,7 @@ async function loadWeather() {
         lastData = cached.data
         showOfflineBanner(cached.fetchedAt)
         currentSection.render(cached.data.current, units)
-        dailySection.render(cached.data.daily, units)
+        dailySection.render(cached.data.daily, cached.data.hourly, units)
       } else {
         const msg = 'No data — connect to load weather'
         currentSection.showError(msg, loadWeather)
@@ -213,8 +213,8 @@ appEl.innerHTML = `
   <div class="app">
     <header class="header">
       <div class="header-location">
-        <span class="header-city" id="header-city">—</span>
         <span class="header-date" id="header-date">${todayFormatted}</span>
+        <span class="header-city" id="header-city">—</span>
       </div>
       <div class="header-actions">
         <button class="units-toggle" id="units-toggle" aria-label="Toggle units">°C</button>
@@ -278,7 +278,7 @@ document.getElementById('units-toggle').addEventListener('click', () => {
   // Re-render from lastData without re-fetching
   if (lastData) {
     currentSection.render(lastData.current, next)
-    dailySection.render(lastData.daily, next)
+    dailySection.render(lastData.daily, lastData.hourly, next)
   }
 })
 

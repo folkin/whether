@@ -88,3 +88,16 @@ export function getCachedWeather() {
 export function setCachedWeather(data) {
   localStorage.setItem(STORAGE_KEYS.weatherCache, JSON.stringify({ data, fetchedAt: Date.now() }))
 }
+
+// --- Radar Color ---
+
+const VALID_RADAR_COLORS = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+export function getRadarColor() {
+  const val = parseInt(localStorage.getItem(STORAGE_KEYS.radarColor), 10)
+  return VALID_RADAR_COLORS.includes(val) ? val : 6 // default: NEXRAD Level III
+}
+
+export function setRadarColor(color) {
+  localStorage.setItem(STORAGE_KEYS.radarColor, String(color))
+}

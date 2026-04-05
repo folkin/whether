@@ -11,6 +11,16 @@ const STATIC_DAILY = [
   { date: '2026-04-10', tempMin: 44.5, tempMax: 58.8, precipSum: 0.0,   precipProbMax: 6,  weatherCode: 3,  sunrise: '2026-04-10T06:20', sunset: '2026-04-10T19:53' },
 ]
 
+const STATIC_HOURLY = Array.from({ length: 24 }, (_, h) => ({
+  time: `2026-04-04T${String(h).padStart(2, '0')}:00`,
+  temp: 60,
+  feelsLike: 58,
+  precipProb: 5,
+  precip: 0,
+  weatherCode: 3,
+  windSpeed: 10,
+}))
+
 function makeEl() {
   return document.createElement('div')
 }
@@ -25,29 +35,29 @@ describe('Daily Forecast Renderer', () => {
   })
 
   it('render() inserts content into el', () => {
-    section.render(STATIC_DAILY, 'imperial')
+    section.render(STATIC_DAILY, STATIC_HOURLY, 'imperial')
     expect(el.innerHTML.trim()).not.toBe('')
   })
 
   it('render() produces 7 forecast-day rows', () => {
-    section.render(STATIC_DAILY, 'imperial')
+    section.render(STATIC_DAILY, STATIC_HOURLY, 'imperial')
     const days = el.querySelectorAll('.forecast-day')
     expect(days.length).toBe(7)
   })
 
   it('render() output contains an <svg> for each row (at least 7 icons)', () => {
-    section.render(STATIC_DAILY, 'imperial')
+    section.render(STATIC_DAILY, STATIC_HOURLY, 'imperial')
     const svgs = el.querySelectorAll('svg')
     expect(svgs.length).toBeGreaterThanOrEqual(7)
   })
 
   it('render() with imperial units contains °F', () => {
-    section.render(STATIC_DAILY, 'imperial')
+    section.render(STATIC_DAILY, STATIC_HOURLY, 'imperial')
     expect(el.innerHTML).toContain('°F')
   })
 
   it('render() with metric units contains °C', () => {
-    section.render(STATIC_DAILY, 'metric')
+    section.render(STATIC_DAILY, STATIC_HOURLY, 'metric')
     expect(el.innerHTML).toContain('°C')
   })
 
@@ -81,7 +91,7 @@ describe('Daily Forecast Renderer', () => {
     const skeletonsBefore = el.querySelectorAll('.forecast-day.skeleton').length
     expect(skeletonsBefore).toBe(7)
 
-    section.render(STATIC_DAILY, 'imperial')
+    section.render(STATIC_DAILY, STATIC_HOURLY, 'imperial')
 
     const skeletonsAfter = el.querySelectorAll('.forecast-day.skeleton').length
     expect(skeletonsAfter).toBe(0)

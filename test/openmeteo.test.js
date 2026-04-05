@@ -4,6 +4,20 @@ import { API } from '../src/config.js'
 
 // --- fixture data ---
 
+function makeHourlyBlock() {
+  const days = ['2026-04-04','2026-04-05','2026-04-06','2026-04-07','2026-04-08','2026-04-09','2026-04-10']
+  const time = days.flatMap(d => Array.from({ length: 24 }, (_, h) => `${d}T${String(h).padStart(2,'0')}:00`))
+  return {
+    time,
+    temperature_2m:          time.map(() => 15),
+    apparent_temperature:     time.map(() => 13),
+    precipitation_probability: time.map(() => 10),
+    precipitation:            time.map(() => 0),
+    weather_code:             time.map(() => 3),
+    wind_speed_10m:           time.map(() => 12),
+  }
+}
+
 const MOCK_RESPONSE = {
   current_units: {
     temperature_2m: '°C',
@@ -40,6 +54,7 @@ const MOCK_RESPONSE = {
       '2026-04-07T19:51', '2026-04-08T19:53', '2026-04-09T19:55', '2026-04-10T19:57',
     ],
   },
+  hourly: makeHourlyBlock(),
 }
 
 const MOCK_RESPONSE_IMPERIAL = {
@@ -52,6 +67,7 @@ const MOCK_RESPONSE_IMPERIAL = {
   },
   current: { ...MOCK_RESPONSE.current },
   daily: { ...MOCK_RESPONSE.daily },
+  hourly: makeHourlyBlock(),
 }
 
 function makeFetchOk(body) {
