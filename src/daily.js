@@ -158,25 +158,6 @@ export function initDailySection(el) {
       renderHourlyPanel()
     },
 
-    showSkeleton() {
-      const skeletonRows = Array.from({ length: 10 }, () => `
-        <div class="forecast-day skeleton">
-          <span class="forecast-day-label skeleton-block" style="width:48px;height:12px;"></span>
-          <span class="forecast-icon skeleton-block" style="width:24px;height:24px;border-radius:4px;"></span>
-          <div class="forecast-temps">
-            <span class="forecast-high skeleton-block" style="width:36px;height:14px;"></span>
-            <span class="forecast-low skeleton-block" style="width:28px;height:12px;"></span>
-          </div>
-          <span class="forecast-precip skeleton-block" style="width:28px;height:10px;"></span>
-        </div>
-      `).join('')
-
-      el.innerHTML = `
-        <div class="forecast-section-label">10-Day Forecast</div>
-        <div class="forecast-strip">${skeletonRows}</div>
-      `
-    },
-
     showError(msg, onRetry) {
       el.innerHTML = `
         <div class="daily-error" style="padding:16px;text-align:center;">

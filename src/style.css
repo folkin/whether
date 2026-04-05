@@ -172,16 +172,17 @@ svg {
 
 .current-top {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
   margin-bottom: 24px;
 }
 
 .current-temp-block {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
 .current-temp {
@@ -192,20 +193,23 @@ svg {
   color: var(--fg);
 }
 
-.current-feels {
+.current-feels,
+.current-condition-label {
   font-size: 0.9rem;
   color: var(--fg-muted);
-  margin-top: 4px;
+  font-weight: 400;
 }
 
 .current-condition {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--fg);
-  margin-top: 8px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.current-condition svg {
+  width: 80px;
+  height: 80px;
 }
 
 /* Current conditions detail grid */
@@ -220,6 +224,7 @@ svg {
 .detail-item {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
 }
 
@@ -283,7 +288,7 @@ svg {
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--fg-muted);
   text-transform: uppercase;
@@ -309,18 +314,18 @@ svg {
 }
 
 .forecast-high {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--fg);
 }
 
 .forecast-low {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--fg-muted);
 }
 
 .forecast-precip {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: var(--vscode-charts-blue);
   display: flex;
   align-items: center;
@@ -344,21 +349,28 @@ svg {
   .current-details { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* 600px: current conditions layout + tighten forecast spacing */
+/* 600px: scale down current conditions, tighten forecast spacing */
 @media (max-width: 600px) {
-  .current-temp { font-size: 4rem; }
-  .current-top { flex-direction: column; }
+  .current-temp { font-size: 3.5rem; }
+  .current-feels,
+  .current-condition-label { font-size: 0.82rem; }
+  .current-condition svg { width: 60px; height: 60px; }
   .forecast-day {
     gap: 3px;
     padding: 8px 4px 10px;
   }
-  .forecast-day-label { font-size: 0.7rem; }
-  .forecast-high { font-size: 0.85rem; }
-  .forecast-low { font-size: 0.78rem; }
+  .forecast-day-label { font-size: 0.78rem; }
+  .forecast-high { font-size: 0.95rem; }
+  .forecast-low { font-size: 0.85rem; }
 }
 
-/* 400px: hide non-essential forecast elements */
+/* 400px: scale down current conditions further, hide non-essential forecast elements */
 @media (max-width: 400px) {
+  .current-temp { font-size: 2.75rem; }
+  .current-feels,
+  .current-condition-label { font-size: 0.75rem; }
+  .current-condition svg { width: 44px; height: 44px; }
+  .current-top { gap: 20px; }
   .forecast-precip { display: none; }
   .forecast-day-label { font-size: 0.62rem; letter-spacing: 0; }
   .forecast-high { font-size: 0.78rem; }
@@ -408,7 +420,8 @@ svg {
    block so the map fills it and the controls overlay correctly. */
 .tab-panel#panel-radar {
   position: relative;
-  height: 480px;
+  height: calc(100svh - 160px);
+  min-height: 400px;
   padding: 0;
   overflow: hidden;
   border-radius: 8px;
@@ -575,7 +588,6 @@ svg {
 /* ── Responsive adjustments ──────────────────────────────── */
 @media (max-width: 600px) {
   .tab-panel#panel-radar {
-    height: 360px;
     border-radius: 6px;
   }
 

@@ -102,11 +102,7 @@ function showLocationPrompt() {
 async function loadWeather() {
   if (!currentSection || !dailySection) return
 
-  // 1. Show skeletons
-  currentSection.showSkeleton()
-  dailySection.showSkeleton()
-
-  // 2. Read location
+  // 1. Read location
   const loc = getLocation()
 
   // 3. No location: show prompt
