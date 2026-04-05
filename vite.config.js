@@ -57,8 +57,8 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'Weather',
-        short_name: 'Weather',
+        name: 'Whether',
+        short_name: 'Whether',
         description: 'Personal weather dashboard',
         theme_color: '#0069cc',
         background_color: '#ffffff',

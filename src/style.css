@@ -254,7 +254,7 @@ svg {
 
 .forecast-strip {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   overflow-x: auto;
   overflow-y: visible;
 }
@@ -331,81 +331,23 @@ svg {
   color: var(--fg-muted);
 }
 
-/* ============================================================
-   APP ICON CANDIDATES
-============================================================ */
-.app-icons-section {
-  margin-bottom: 24px;
-}
-
-.app-icons-grid {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.app-icon-candidate {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.app-icon-box {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.app-icon-box svg {
-  width: 36px;
-  height: 36px;
-  stroke: white;
-  stroke-width: 1.5;
-}
-
-.app-icon-label {
-  font-size: 0.75rem;
-  color: var(--fg-muted);
-}
-
-/* ============================================================
-   SECTION HEADINGS
-============================================================ */
-.section-heading {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--fg-muted);
-  margin-bottom: 12px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* ============================================================
-   ATTRIBUTION
-============================================================ */
-.attribution {
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--fg-muted);
-  padding: 16px 0 8px;
-  border-top: 1px solid var(--border);
-}
 
 /* ============================================================
    RESPONSIVE
 ============================================================ */
+
+/* 768px: forecast wraps to 2 rows of 5, current details to 2 columns */
+@media (max-width: 768px) {
+  .forecast-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .forecast-day:nth-child(5n) { border-right: none; }
+  .forecast-day:nth-child(-n+5) { border-bottom: 1px solid var(--border); }
+  .current-details { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 600px: current conditions layout + tighten forecast spacing */
 @media (max-width: 600px) {
   .current-temp { font-size: 4rem; }
   .current-top { flex-direction: column; }
-  .current-details { grid-template-columns: repeat(2, 1fr); }
   .forecast-day {
     gap: 3px;
     padding: 8px 4px 10px;
@@ -415,6 +357,7 @@ svg {
   .forecast-low { font-size: 0.78rem; }
 }
 
+/* 400px: hide non-essential forecast elements */
 @media (max-width: 400px) {
   .forecast-precip { display: none; }
   .forecast-day-label { font-size: 0.62rem; letter-spacing: 0; }
@@ -456,20 +399,6 @@ svg {
 
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
-
-/* ============================================================
-   RADAR STUB
-============================================================ */
-.radar-stub {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  color: var(--fg-muted);
-  font-size: 0.9rem;
-  gap: 8px;
-}
 
 /* ============================================================
    RADAR MAP & CONTROLS

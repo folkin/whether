@@ -67,7 +67,7 @@ function buildUrl(lat, lon, units) {
       'wind_speed_10m',
     ].join(','),
     timezone: 'auto',
-    forecast_days: '7',
+    forecast_days: '10',
   })
 
   if (units === 'imperial') {

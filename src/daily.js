@@ -90,16 +90,35 @@ export function initDailySection(el) {
     }).join('')
   }
 
+  function selectDay(idx) {
+    selectedIdx = Math.max(0, Math.min(_daily.length - 1, idx))
+    el.querySelectorAll('.forecast-day').forEach((d, j) => {
+      d.classList.toggle('selected', j === selectedIdx)
+    })
+    el.querySelectorAll('.forecast-day')[selectedIdx]
+      ?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+    renderHourlyPanel()
+  }
+
   function attachDayClicks() {
     el.querySelectorAll('.forecast-day').forEach((dayEl, i) => {
-      dayEl.addEventListener('click', () => {
-        selectedIdx = i
-        el.querySelectorAll('.forecast-day').forEach((d, j) => {
-          d.classList.toggle('selected', j === selectedIdx)
-        })
-        renderHourlyPanel()
-      })
+      dayEl.addEventListener('click', () => selectDay(i))
     })
+  }
+
+  function attachSwipe() {
+    let startX = 0
+    let startY = 0
+    el.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+    }, { passive: true })
+    el.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - startX
+      const dy = e.changedTouches[0].clientY - startY
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return
+      selectDay(selectedIdx + (dx < 0 ? 1 : -1))
+    }, { passive: true })
   }
 
   return {
@@ -129,17 +148,18 @@ export function initDailySection(el) {
       }).join('')
 
       el.innerHTML = `
-        <div class="forecast-section-label">7-Day Forecast</div>
+        <div class="forecast-section-label">10-Day Forecast</div>
         <div class="forecast-strip">${rows}</div>
         <div class="hourly-panel"></div>
       `
 
       attachDayClicks()
+      attachSwipe()
       renderHourlyPanel()
     },
 
     showSkeleton() {
-      const skeletonRows = Array.from({ length: 7 }, () => `
+      const skeletonRows = Array.from({ length: 10 }, () => `
         <div class="forecast-day skeleton">
           <span class="forecast-day-label skeleton-block" style="width:48px;height:12px;"></span>
           <span class="forecast-icon skeleton-block" style="width:24px;height:24px;border-radius:4px;"></span>
@@ -152,7 +172,7 @@ export function initDailySection(el) {
       `).join('')
 
       el.innerHTML = `
-        <div class="forecast-section-label">7-Day Forecast</div>
+        <div class="forecast-section-label">10-Day Forecast</div>
         <div class="forecast-strip">${skeletonRows}</div>
       `
     },
