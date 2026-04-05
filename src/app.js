@@ -308,9 +308,24 @@ window.addEventListener('geo:locationError', (e) => {
     locateBtn.disabled = false
     locateBtn.style.opacity = ''
     locateBtn.setAttribute('aria-label', 'Update location')
-    // Briefly show error on button title
-    locateBtn.title = e.detail?.message ?? 'Location error'
-    setTimeout(() => { locateBtn.title = '' }, 4000)
+  }
+
+  const code = e.detail?.code
+  const msg = code === 1
+    ? 'Location permission denied. Check your browser settings and try again.'
+    : code === 2
+      ? 'Location unavailable. Try again or check your connection.'
+      : 'Location request timed out. Try again.'
+
+  const container = document.getElementById('offline-banner-container')
+  if (container) {
+    container.innerHTML = `
+      <div class="offline-banner">
+        <div class="dot" style="background:var(--vscode-charts-red)"></div>
+        <span>${msg}</span>
+      </div>
+    `
+    setTimeout(() => { if (container) container.innerHTML = '' }, 6000)
   }
 })
 

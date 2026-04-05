@@ -254,7 +254,9 @@ svg {
 
 .forecast-strip {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
 .forecast-day {
@@ -289,7 +291,6 @@ svg {
 }
 
 .forecast-day-monthday {
-  white-space: nowrap;
   font-weight: 400;
 }
 
